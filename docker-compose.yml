@@ -1,0 +1,40 @@
+version: "3"
+
+
+services:
+  mysql:
+    image: mariadb:10.3.6
+    volumes:
+     - "./data/mysql:/var/lib/mysql"
+    environment: 
+     - MYSQL_ROOT_PASSWORD=root_password
+
+  db_init:
+    image: bboehmke/db-helper
+    command: "app:init"
+    environment:
+      - DB_TYPE=mysql
+      - DB_ROOT_PASSWORD=root_password
+      - DB_HOST=mysql
+      - DB_DATABASE=boinc
+      - DB_USER=boinc
+      - DB_PASSWORD=password
+
+  boinc:
+    image: test/boinc:latest
+    hostname: $PROJECT_SHORT
+    links:
+     - mysql
+    volumes: 
+     - "./data/project:/project"
+    ports: 
+     - "80:80"
+    tty: true
+    environment:
+      - URL_BASE=$URL_BASE
+      - PROJECT_SHORT=$PROJECT_SHORT
+      - PROJECT_LONG=$PROJECT_LONG
+      - DB_HOST=mysql
+      - DB_NAME=boinc
+      - DB_USER=boinc
+      - DB_PASS=password
